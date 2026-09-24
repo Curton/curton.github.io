@@ -6,16 +6,37 @@
 <title>CoveyLiu · @curton</title>
 <meta name="description" content="CoveyLiu (@curton) — Java Developer Who Loves Trading. Pinned projects on GitHub.">
 <link rel="icon" href="https://github.com/curton.png">
+<meta name="theme-color" content="#0d1117">
 <style>
   :root {
+    color-scheme: dark;
     --bg: #0d1117;
     --card: #161b22;
     --border: #30363d;
     --text: #e6edf3;
     --muted: #8b949e;
     --accent: #58a6ff;
+    --accent-border: rgba(88,166,255,.55);
+    --chip-bg: rgba(88,166,255,.12);
+    --chip-border: rgba(88,166,255,.25);
+    --ring: rgba(88,166,255,.12);
+    --shadow: rgba(0,0,0,.35);
     --java: #b07219;
     --go: #00add8;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --muted: #59636e;
+    --accent: #0969da;
+    --accent-border: rgba(9,105,218,.45);
+    --chip-bg: rgba(9,105,218,.08);
+    --chip-border: rgba(9,105,218,.3);
+    --ring: rgba(9,105,218,.12);
+    --shadow: rgba(31,35,40,.12);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -24,15 +45,32 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
     line-height: 1.6;
     min-height: 100vh;
+    transition: background-color .25s ease, color .25s ease;
   }
   .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 64px; }
+
+  /* Theme toggle */
+  .theme-btn {
+    position: fixed; top: 18px; right: 18px; z-index: 20;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s ease, transform .15s ease, background-color .25s ease;
+  }
+  .theme-btn:hover { border-color: var(--accent-border); transform: scale(1.06); }
+  .theme-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .theme-btn svg { fill: var(--muted); display: none; }
+  .theme-btn:hover svg { fill: var(--text); }
+  .theme-btn[data-mode="auto"] .icon-auto,
+  .theme-btn[data-mode="light"] .icon-light,
+  .theme-btn[data-mode="dark"] .icon-dark { display: block; }
 
   /* Hero */
   .hero { display: flex; gap: 24px; align-items: center; margin-bottom: 14px; }
   .avatar {
     width: 116px; height: 116px; border-radius: 50%;
     border: 2px solid var(--border);
-    box-shadow: 0 0 0 5px rgba(88,166,255,.12);
+    box-shadow: 0 0 0 5px var(--ring);
     flex-shrink: 0;
   }
   .hero h1 { font-size: 30px; font-weight: 700; letter-spacing: -.5px; }
@@ -64,12 +102,12 @@
     border-radius: 10px;
     padding: 18px 20px;
     display: flex; flex-direction: column; gap: 10px;
-    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .25s ease;
   }
   .card:hover {
     transform: translateY(-3px);
-    border-color: rgba(88,166,255,.55);
-    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    border-color: var(--accent-border);
+    box-shadow: 0 8px 24px var(--shadow);
   }
   .card .repo { display: flex; align-items: center; gap: 8px; }
   .card .repo svg { fill: var(--muted); flex-shrink: 0; }
@@ -82,8 +120,8 @@
   .card .topics { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip {
     font-size: 11px; padding: 2px 9px; border-radius: 999px;
-    background: rgba(88,166,255,.12); color: var(--accent);
-    border: 1px solid rgba(88,166,255,.25);
+    background: var(--chip-bg); color: var(--accent);
+    border: 1px solid var(--chip-border);
   }
   .card .foot { display: flex; gap: 16px; color: var(--muted); font-size: 12.5px; align-items: center; }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: -1px; }
@@ -93,8 +131,24 @@
   footer a { color: var(--accent); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
 </style>
+<script>
+  // Apply saved theme (or system preference) before first paint to avoid a flash.
+  (function () {
+    var m = null;
+    try { m = localStorage.getItem("theme-mode"); } catch (e) {}
+    if (m !== "light" && m !== "dark") m = "auto";
+    var dark = m === "dark" ||
+      (m === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  })();
+</script>
 </head>
 <body>
+<button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch theme">
+  <svg class="icon-auto" width="16" height="16" viewBox="0 0 16 16" fill-rule="evenodd"><path d="M4 .5h8A1.5 1.5 0 0 1 13.5 2v6.5A1.5 1.5 0 0 1 12 10H4A1.5 1.5 0 0 1 2.5 8.5V2A1.5 1.5 0 0 1 4 .5ZM3.5 2.5h9v5h-9v-5ZM7.25 11h1.5v2H11a.75.75 0 0 1 0 1.5H5a.75.75 0 0 1 0-1.5h2.25v-2Z"/></svg>
+  <svg class="icon-light" width="16" height="16" viewBox="0 0 16 16"><path d="M8 4.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5ZM8 0a.75.75 0 0 1 .75.75v1.3a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13.2a.75.75 0 0 1 .75.75v1.3a.75.75 0 0 1-1.5 0v-1.3a.75.75 0 0 1 .75-.75Zm8-5.2a.75.75 0 0 1-.75.75h-1.3a.75.75 0 0 1 0-1.5h1.3A.75.75 0 0 1 16 8ZM2.8 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.3A.75.75 0 0 1 2.8 8Zm11.02-4.98a.75.75 0 0 1 0 1.06l-.92.92a.75.75 0 1 1-1.06-1.06l.92-.92a.75.75 0 0 1 1.06 0ZM4.16 10.68a.75.75 0 0 1 0 1.06l-.92.92a.75.75 0 1 1-1.06-1.06l.92-.92a.75.75 0 0 1 1.06 0Zm7.68 0a.75.75 0 0 1 1.06 0l.92.92a.75.75 0 1 1-1.06 1.06l-.92-.92a.75.75 0 0 1 0-1.06ZM3.24 3.02a.75.75 0 0 1 1.06 0l.92.92a.75.75 0 0 1-1.06 1.06l-.92-.92a.75.75 0 0 1 0-1.06Z"/></svg>
+  <svg class="icon-dark" width="16" height="16" viewBox="0 0 16 16"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678Z"/></svg>
+</button>
 <div class="wrap">
 
   <header class="hero">
@@ -190,5 +244,39 @@
   </footer>
 
 </div>
+<script>
+  (function () {
+    var btn = document.getElementById("theme-toggle");
+    var mql = window.matchMedia("(prefers-color-scheme: dark)");
+    var themeColors = { dark: "#0d1117", light: "#f6f8fa" };
+    var labels = { auto: "Theme: follow system", light: "Theme: light", dark: "Theme: dark" };
+    var mode = "auto";
+    try {
+      var v = localStorage.getItem("theme-mode");
+      if (v === "light" || v === "dark" || v === "auto") mode = v;
+    } catch (e) {}
+
+    function resolved() {
+      return mode === "auto" ? (mql.matches ? "dark" : "light") : mode;
+    }
+    function apply(save) {
+      var theme = resolved();
+      document.documentElement.setAttribute("data-theme", theme);
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", themeColors[theme]);
+      btn.setAttribute("data-mode", mode);
+      btn.setAttribute("aria-label", labels[mode] + " (click to switch)");
+      btn.title = labels[mode] + " (click to switch)";
+      if (save) { try { localStorage.setItem("theme-mode", mode); } catch (e) {} }
+    }
+
+    btn.addEventListener("click", function () {
+      mode = mode === "auto" ? "light" : mode === "light" ? "dark" : "auto";
+      apply(true);
+    });
+    mql.addEventListener("change", function () { if (mode === "auto") apply(false); });
+    apply(false);
+  })();
+</script>
 </body>
 </html>
