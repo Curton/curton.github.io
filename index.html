@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoveyLiu · @curton</title>
+<meta name="description" content="CoveyLiu (@curton) — Java Developer Who Loves Trading. Pinned projects on GitHub.">
+<link rel="icon" href="https://github.com/curton.png">
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --java: #b07219;
+    --go: #00add8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 64px; }
+
+  /* Hero */
+  .hero { display: flex; gap: 24px; align-items: center; margin-bottom: 14px; }
+  .avatar {
+    width: 116px; height: 116px; border-radius: 50%;
+    border: 2px solid var(--border);
+    box-shadow: 0 0 0 5px rgba(88,166,255,.12);
+    flex-shrink: 0;
+  }
+  .hero h1 { font-size: 30px; font-weight: 700; letter-spacing: -.5px; }
+  .hero .login { font-size: 18px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .hero .login a { color: var(--muted); text-decoration: none; }
+  .hero .login a:hover { color: var(--accent); }
+  .bio { font-size: 16px; margin-bottom: 10px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 18px; color: var(--muted); font-size: 14px; }
+  .meta svg { vertical-align: -2px; margin-right: 5px; fill: var(--muted); }
+  .meta a { color: var(--muted); text-decoration: none; }
+  .meta a:hover { color: var(--accent); }
+
+  /* Divider heading */
+  h2 {
+    font-size: 14px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--muted);
+    margin: 44px 0 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2 .pin { fill: var(--muted); }
+
+  /* Cards */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } .hero { flex-direction: column; text-align: center; } .meta { justify-content: center; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(88,166,255,.55);
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .card .repo { display: flex; align-items: center; gap: 8px; }
+  .card .repo svg { fill: var(--muted); flex-shrink: 0; }
+  .card .repo a {
+    color: var(--accent); font-weight: 600; font-size: 16px;
+    text-decoration: none; word-break: break-all;
+  }
+  .card .repo a:hover { text-decoration: underline; }
+  .card .desc { font-size: 14px; color: var(--text); flex-grow: 1; }
+  .card .topics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 11px; padding: 2px 9px; border-radius: 999px;
+    background: rgba(88,166,255,.12); color: var(--accent);
+    border: 1px solid rgba(88,166,255,.25);
+  }
+  .card .foot { display: flex; gap: 16px; color: var(--muted); font-size: 12.5px; align-items: center; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: -1px; }
+  .foot svg { fill: var(--muted); vertical-align: -2px; margin-right: 4px; }
+
+  footer { margin-top: 56px; text-align: center; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <img class="avatar" src="https://github.com/curton.png" alt="Curton avatar">
+    <div>
+      <h1>CoveyLiu</h1>
+      <div class="login"><a href="https://github.com/curton">@curton</a></div>
+    </div>
+  </header>
+  <p class="bio">Java Developer Who Loves Trading</p>
+  <div class="meta">
+    <span>
+      <svg width="14" height="14" viewBox="0 0 16 16"><path d="m12.596 11.596-3.535 3.536a1.5 1.5 0 0 1-2.122 0l-3.535-3.536a6.5 6.5 0 1 1 9.192-9.193 6.5 6.5 0 0 1 0 9.193Zm-1.06-8.132v-.001a5 5 0 1 0-7.072 7.072L8 14.07l3.536-3.534a5 5 0 0 0 0-7.072ZM8 9a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 9Z"/></svg>
+      Hong Kong
+    </span>
+    <span>
+      <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+      <a href="https://github.com/curton?tab=repositories">30 repositories</a>
+    </span>
+    <span>
+      <svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+      11 followers
+    </span>
+  </div>
+
+  <h2>
+    <svg class="pin" width="14" height="14" viewBox="0 0 16 16"><path d="M4.456.734a1.75 1.75 0 0 1 2.726.832l.361 1.084a2.25 2.25 0 0 0 1.379 1.434l1.35.492a2.25 2.25 0 0 0 2.266-.449l.224-.214a1.75 1.75 0 0 1 2.876 2.183l-.207.243a2.25 2.25 0 0 0-.438 2.256l.493 1.352a2.25 2.25 0 0 0 1.437 1.382l1.09.346c.9.286 1.243 1.383.647 2.148l-.673.863a2.25 2.25 0 0 0-.406 2.07l.194.582c.24.72-.268 1.48-1.027 1.48H3.646a1.75 1.75 0 0 1-1.543-.918L.11 14.475c-.4-.75-.05-1.68.756-1.977l1.318-.494a2.25 2.25 0 0 0 1.36-1.332l.464-1.258a2.25 2.25 0 0 0-.278-2.026L2.716 6.28a1.75 1.75 0 0 1-.096-1.86Z"/></svg>
+    Pinned Projects
+  </h2>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="repo">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+        <a href="https://github.com/Curton/COM-Port-File-Sync">COM-Port-File-Sync</a>
+      </div>
+      <div class="desc">Cross-platform Java application for synchronizing files between two computers over a serial (COM) port connection — built on XMODEM with error detection, retries, compression and conflict resolution.</div>
+      <div class="foot">
+        <span><span class="dot" style="background: var(--java)"></span>Java</span>
+        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>1</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="repo">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+        <a href="https://github.com/Curton/GoMatchingKernel">GoMatchingKernel</a>
+      </div>
+      <div class="desc">An order matching engine written in Go.</div>
+      <div class="topics">
+        <span class="chip">matching-engine</span>
+        <span class="chip">exchange</span>
+      </div>
+      <div class="foot">
+        <span><span class="dot" style="background: var(--go)"></span>Go</span>
+        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>3</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="repo">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+        <a href="https://github.com/Curton/GoMatchingDemo">GoMatchingDemo</a>
+      </div>
+      <div class="desc">Live demonstration project for GoMatchingKernel — a high-performance, price-time priority matching engine.</div>
+      <div class="topics">
+        <span class="chip">matching-engine</span>
+        <span class="chip">trading</span>
+      </div>
+      <div class="foot">
+        <span><span class="dot" style="background: var(--go)"></span>Go</span>
+        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="repo">
+        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
+        <a href="https://github.com/Curton/Reed-Solomon-GF-2-16">Reed-Solomon-GF-2-16</a>
+      </div>
+      <div class="desc">Java Reed–Solomon implementation over GF(2<sup>16</sup>).</div>
+      <div class="foot">
+        <span><span class="dot" style="background: var(--java)"></span>Java</span>
+        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>0</span>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <a href="https://github.com/curton">github.com/curton</a> · See all <a href="https://github.com/curton?tab=repositories">repositories</a>
+  </footer>
+
+</div>
+</body>
+</html>
