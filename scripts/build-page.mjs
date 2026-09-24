@@ -1,11 +1,134 @@
-<!DOCTYPE html>
+// Regenerates index.html from live GitHub data (profile + pinned repos).
+// Run: GH_TOKEN=<token> GITHUB_LOGIN=Curton node scripts/build-page.mjs
+// Descriptions listed in OVERRIDES (trusted HTML) win over the repo's raw
+// API description, which reads poorly for a few repos (markdown syntax, null).
+import { writeFileSync } from "node:fs";
+
+// GitHub logins are case-insensitive for lookup and URLs; lowercase keeps the
+// rendered page consistent regardless of how the env var is spelled.
+const LOGIN = (process.env.GITHUB_LOGIN || "curton").toLowerCase();
+const TOKEN = process.env.GH_TOKEN;
+if (!TOKEN) {
+  console.error("GH_TOKEN is required (a GitHub token with API read access)");
+  process.exit(1);
+}
+
+const OVERRIDES = {
+  GoMatchingKernel: "An order matching engine written in Go.",
+  "COM-Port-File-Sync":
+    "Cross-platform Java application for synchronizing files between two computers over a serial (COM) port connection — built on XMODEM with error detection, retries, compression and conflict resolution.",
+  GoMatchingDemo:
+    "Live demonstration project for GoMatchingKernel — a high-performance, price-time priority matching engine.",
+  "Reed-Solomon-GF-2-16":
+    "Java Reed–Solomon implementation over GF(2<sup>16</sup>).",
+};
+
+const QUERY = `query($login: String!) {
+  user(login: $login) {
+    name
+    bio
+    location
+    followers { totalCount }
+    repositories(privacy: PUBLIC) { totalCount }
+    pinnedItems(first: 6, types: REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          description
+          url
+          stargazerCount
+          primaryLanguage { name color }
+          repositoryTopics(first: 10) { nodes { topic { name } } }
+        }
+      }
+    }
+  }
+}`;
+
+const esc = (s) =>
+  String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+const BOOK_ICON =
+  '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>';
+const STAR_ICON =
+  '<svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>';
+
+const res = await fetch("https://api.github.com/graphql", {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${TOKEN}`,
+    "User-Agent": "curton.github.io page builder",
+    "Content-Type": "application/json",
+    Accept: "application/vnd.github+json",
+  },
+  body: JSON.stringify({ query: QUERY, variables: { login: LOGIN } }),
+});
+if (!res.ok) {
+  console.error(`GraphQL endpoint returned HTTP ${res.status}: ${await res.text()}`);
+  process.exit(1);
+}
+const body = await res.json();
+if (body.errors) {
+  console.error("GraphQL errors:", JSON.stringify(body.errors, null, 2));
+  process.exit(1);
+}
+const user = body.data.user;
+if (!user) {
+  console.error(`User "${LOGIN}" not found`);
+  process.exit(1);
+}
+
+const cards = user.pinnedItems.nodes
+  .map((r) => {
+    const desc = OVERRIDES[r.name] ?? (r.description ? esc(r.description) : null);
+    const topics = (r.repositoryTopics?.nodes ?? []).map((t) => t.topic.name);
+    return { ...r, desc, topics };
+  })
+  .filter((r) => r.desc); // a card without any description says nothing; skip it
+
+if (!cards.length) {
+  console.error("No pinned repositories with a description found; keeping current page");
+  process.exit(1);
+}
+
+const cardHtml = cards
+  .map((r) => {
+    const topicsHtml = r.topics.length
+      ? `\n      <div class="topics">\n${r.topics.map((t) => `        <span class="chip">${esc(t)}</span>`).join("\n")}\n      </div>`
+      : "";
+    const langHtml = r.primaryLanguage
+      ? `\n        <span><span class="dot" style="background: ${esc(r.primaryLanguage.color)}"></span>${esc(r.primaryLanguage.name)}</span>`
+      : "";
+    return `    <div class="card">
+      <div class="repo">
+        ${BOOK_ICON}
+        <a href="${esc(r.url)}">${esc(r.name)}</a>
+      </div>
+      <div class="desc">${r.desc}</div>${topicsHtml}
+      <div class="foot">${langHtml}
+        <span>${STAR_ICON}${r.stargazerCount}</span>
+      </div>
+    </div>`;
+  })
+  .join("\n\n");
+
+const locationHtml = user.location
+  ? `    <span>
+      <svg width="14" height="14" viewBox="0 0 16 16"><path d="m12.596 11.596-3.535 3.536a1.5 1.5 0 0 1-2.122 0l-3.535-3.536a6.5 6.5 0 1 1 9.192-9.193 6.5 6.5 0 0 1 0 9.193Zm-1.06-8.132v-.001a5 5 0 1 0-7.072 7.072L8 14.07l3.536-3.534a5 5 0 0 0 0-7.072ZM8 9a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 9Z"/></svg>
+      ${esc(user.location)}
+    </span>`
+  : "";
+
+const name = esc(user.name || LOGIN);
+
+const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CoveyLiu · @curton</title>
-<meta name="description" content="CoveyLiu (@curton) — Java Developer Who Loves Trading. Pinned projects on GitHub.">
-<link rel="icon" href="https://github.com/curton.png">
+<title>${name} · @${esc(LOGIN)}</title>
+<meta name="description" content="${name} (@${esc(LOGIN)})${user.bio ? " — " + esc(user.bio) : ""}. Pinned projects on GitHub.">
+<link rel="icon" href="https://github.com/${esc(LOGIN)}.png">
 <meta name="theme-color" content="#0d1117">
 <style>
   :root {
@@ -150,25 +273,21 @@
 <div class="wrap">
 
   <header class="hero">
-    <img class="avatar" src="https://github.com/curton.png" alt="curton avatar">
+    <img class="avatar" src="https://github.com/${esc(LOGIN)}.png" alt="${esc(LOGIN)} avatar">
     <div>
-      <h1>CoveyLiu</h1>
-      <div class="login"><a href="https://github.com/curton">@curton</a></div>
+      <h1>${name}</h1>
+      <div class="login"><a href="https://github.com/${esc(LOGIN)}">@${esc(LOGIN)}</a></div>
     </div>
-  </header>
-  <p class="bio">Java Developer Who Loves Trading</p>
+  </header>${user.bio ? `\n  <p class="bio">${esc(user.bio)}</p>` : ""}
   <div class="meta">
-    <span>
-      <svg width="14" height="14" viewBox="0 0 16 16"><path d="m12.596 11.596-3.535 3.536a1.5 1.5 0 0 1-2.122 0l-3.535-3.536a6.5 6.5 0 1 1 9.192-9.193 6.5 6.5 0 0 1 0 9.193Zm-1.06-8.132v-.001a5 5 0 1 0-7.072 7.072L8 14.07l3.536-3.534a5 5 0 0 0 0-7.072ZM8 9a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 9Z"/></svg>
-      HONG KONG
-    </span>
+${locationHtml}
     <span>
       <svg width="14" height="14" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
-      <a href="https://github.com/curton?tab=repositories">32 repositories</a>
+      <a href="https://github.com/${esc(LOGIN)}?tab=repositories">${user.repositories.totalCount} repositories</a>
     </span>
     <span>
       <svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
-      11 followers
+      ${user.followers.totalCount} followers
     </span>
   </div>
 
@@ -179,66 +298,12 @@
 
   <div class="grid">
 
-    <div class="card">
-      <div class="repo">
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
-        <a href="https://github.com/Curton/COM-Port-File-Sync">COM-Port-File-Sync</a>
-      </div>
-      <div class="desc">Cross-platform Java application for synchronizing files between two computers over a serial (COM) port connection — built on XMODEM with error detection, retries, compression and conflict resolution.</div>
-      <div class="foot">
-        <span><span class="dot" style="background: #b07219"></span>Java</span>
-        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>1</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="repo">
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
-        <a href="https://github.com/Curton/GoMatchingKernel">GoMatchingKernel</a>
-      </div>
-      <div class="desc">An order matching engine written in Go.</div>
-      <div class="topics">
-        <span class="chip">exchange</span>
-        <span class="chip">matching-engine</span>
-      </div>
-      <div class="foot">
-        <span><span class="dot" style="background: #00ADD8"></span>Go</span>
-        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>3</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="repo">
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
-        <a href="https://github.com/Curton/GoMatchingDemo">GoMatchingDemo</a>
-      </div>
-      <div class="desc">Live demonstration project for GoMatchingKernel — a high-performance, price-time priority matching engine.</div>
-      <div class="topics">
-        <span class="chip">matching-engine</span>
-        <span class="chip">trading</span>
-      </div>
-      <div class="foot">
-        <span><span class="dot" style="background: #00ADD8"></span>Go</span>
-        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>0</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="repo">
-        <svg width="16" height="16" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>
-        <a href="https://github.com/Curton/Reed-Solomon-GF-2-16">Reed-Solomon-GF-2-16</a>
-      </div>
-      <div class="desc">Java Reed–Solomon implementation over GF(2<sup>16</sup>).</div>
-      <div class="foot">
-        <span><span class="dot" style="background: #b07219"></span>Java</span>
-        <span><svg width="13" height="13" viewBox="0 0 16 16"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>0</span>
-      </div>
-    </div>
+${cardHtml}
 
   </div>
 
   <footer>
-    <a href="https://github.com/curton">github.com/curton</a> · See all <a href="https://github.com/curton?tab=repositories">repositories</a>
+    <a href="https://github.com/${esc(LOGIN)}">github.com/${esc(LOGIN)}</a> · See all <a href="https://github.com/${esc(LOGIN)}?tab=repositories">repositories</a>
   </footer>
 
 </div>
@@ -278,3 +343,7 @@
 </script>
 </body>
 </html>
+`;
+
+writeFileSync(new URL("../index.html", import.meta.url), html);
+console.log(`index.html regenerated: ${cards.length} pinned repos, ${user.followers.totalCount} followers, ${user.repositories.totalCount} repos`);

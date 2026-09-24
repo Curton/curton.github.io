@@ -1,0 +1,38 @@
+name: Refresh page data
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # every Monday 00:00 UTC (08:00 Hong Kong)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-page
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Regenerate index.html from GitHub data
+        run: node scripts/build-page.mjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_LOGIN: curton
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes; page is up to date"
+          else
+            git commit -m "Refresh page data from GitHub API"
+            git push
+          fi
